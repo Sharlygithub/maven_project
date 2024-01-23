@@ -1,66 +1,50 @@
 pipeline {
     agent any
 
+    tools {
+        maven "mvn"
+        jdk "Java17"
+    }
+
+    triggers {
+        pollSCM('* * * * *') // Schedule SCM polling at a specified interval (every minute in this example)
+    }
+
     stages {
         stage('Checkout') {
             steps {
-                // Check out the source code from version control
-                checkout scm
+                git branch: 'main', url: 'https://github.com/Sharlygithub/maven_project.git'
             }
         }
 
         stage('Build') {
             steps {
-                // Build the Maven project
-                sh 'mvn clean install'
+                echo 'building the application'
             }
         }
 
-        stage('Unit Tests') {
+        stage('Test') {
             steps {
-                // Run unit tests
-                sh 'mvn test'
+                echo 'testing the application'
             }
         }
 
-        stage('Integration Tests') {
+        stage('Deploy') {
             steps {
-                // Run integration tests
-                sh 'mvn verify'
-            }
-        }
-
-        stage('Deploy to Staging') {
-            when {
-                // Run this stage only if the branch is 'staging' and the build is successful
-                expression { env.BRANCH_NAME == 'staging' && currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
-            }
-            steps {
-                // Deployment to staging environment
-                sh './deploy-to-staging.sh'
-            }
-        }
-
-        stage('Deploy to Production') {
-            when {
-                // Run this stage only if the branch is 'production' and the build is successful
-                expression { env.BRANCH_NAME == 'production' && currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
-            }
-            steps {
-                // Deployment to production environment
-                sh './deploy-to-production.sh'
+                echo 'deploying the application'
+                // Add deployment commands or scripts here
             }
         }
     }
 
     post {
         success {
-            // Additional steps to run on successful deployment
-            echo 'Deployment successful!'
+            echo 'Build and deployment successful!'
+            // Add additional success actions or notifications here
         }
         failure {
-            // Additional steps to run on deployment failure
-            echo 'Deployment failed!'
+            echo 'Build or deployment failed!'
+            // Add additional failure actions or notifications here
         }
     }
 }
