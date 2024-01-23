@@ -3,6 +3,7 @@ pipeline {
 
     tools {
         maven "mvn"
+        jdk "Java17"
     }
 
     triggers {
