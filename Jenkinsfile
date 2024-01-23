@@ -1,66 +1,42 @@
-pipeline {
-    agent any
+pipeline { 
+    agent any tools {
+maven "mvn"
+}
+triggers {
+pollSCM('* * * * *') // Schedule SCM polling at a specified interval (every minute in this example)
+}
+stages { 
+    stage('Checkout') { 
+        steps {
+git branch: 'main', url: 'https://github.com/iamkishore0/maven_project.git'
+}
+}
 
-    stages {
-        stage('Checkout') {
-            steps {
-                // Check out the source code from version control
-                checkout scm
-            }
-        }
+stage('Build') { 
+    steps {
+echo 'building the application'
+}
+}
 
-        stage('Build') {
-            steps {
-                // Build the Maven project
-                sh 'mvn clean install'
-            }
-        }
+stage('Test') { 
+    steps {
+echo 'testing the application'
+}
+}
 
-        stage('Unit Tests') {
-            steps {
-                // Run unit tests
-                sh 'mvn test'
-            }
-        }
+stage('Deploy') { 
+    steps {
+echo 'deploying the application'
+}
+}
+}
 
-        stage('Integration Tests') {
-            steps {
-                // Run integration tests
-                sh 'mvn verify'
-            }
-        }
-
-        stage('Deploy to Staging') {
-            when {
-                // Run this stage only if the branch is 'staging' and the build is successful
-                expression { env.BRANCH_NAME == 'staging' && currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
-            }
-            steps {
-                // Deployment to staging environment
-                sh './deploy-to-staging.sh'
-            }
-        }
-
-        stage('Deploy to Production') {
-            when {
-                // Run this stage only if the branch is 'production' and the build is successful
-                expression { env.BRANCH_NAME == 'production' && currentBuild.resultIsBetterOrEqualTo('SUCCESS') }
-            }
-            steps {
-                // Deployment to production environment
-                sh './deploy-to-production.sh'
-            }
-        }
-    }
-
-    post {
-        success {
-            // Additional steps to run on successful deployment
-            echo 'Deployment successful!'
-        }
-        failure {
-            // Additional steps to run on deployment failure
-            echo 'Deployment failed!'
-        }
-    }
+post {
+success {
+echo 'Build and deployment successful!'
+}
+failure {
+echo 'Build or deployment failed!'
+}
+}
 }
